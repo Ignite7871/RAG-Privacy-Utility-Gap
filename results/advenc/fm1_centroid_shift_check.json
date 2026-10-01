@@ -1,0 +1,15 @@
+{
+  "vanilla": {
+    "centroid_norm": 0.10872279107570648
+  },
+  "v1_defended": {
+    "centroid_norm": 0.15178924798965454,
+    "cosine_sim_vs_vanilla_centroid": 0.16390980780124664,
+    "l2_distance_vs_vanilla_centroid": 0.17161187529563904
+  },
+  "v2_defended": {
+    "centroid_norm": 0.3704759478569031,
+    "cosine_sim_vs_vanilla_centroid": 0.045451126992702484,
+    "l2_distance_vs_vanilla_centroid": 0.3813287019729614
+  }
+}

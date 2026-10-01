@@ -1,0 +1,46 @@
+{
+  "MLP_minilm": {
+    "attacker": "MLP",
+    "encoder": "minilm",
+    "dim": 384,
+    "rougeL_precision": 0.37613135253635255,
+    "rougeL_recall": 0.09283855412454617,
+    "rougeL_f1": 0.1452926355967919,
+    "wall_time_seconds": 468.75762610003585,
+    "n_align": 40000,
+    "n_test": 10000
+  },
+  "LinearProbe_minilm": {
+    "attacker": "LinearProbe",
+    "encoder": "minilm",
+    "dim": 384,
+    "rougeL_precision": 0.41990143023643023,
+    "rougeL_recall": 0.10426177941579443,
+    "rougeL_f1": 0.1630985111379758,
+    "wall_time_seconds": 325.5007360999589,
+    "n_align": 40000,
+    "n_test": 10000
+  },
+  "MLP_bge": {
+    "attacker": "MLP",
+    "encoder": "bge",
+    "dim": 1024,
+    "rougeL_precision": 0.39159364066489066,
+    "rougeL_recall": 0.09789493921508703,
+    "rougeL_f1": 0.1527477191905865,
+    "wall_time_seconds": 472.0255928999977,
+    "n_align": 40000,
+    "n_test": 10000
+  },
+  "LinearProbe_bge": {
+    "attacker": "LinearProbe",
+    "encoder": "bge",
+    "dim": 1024,
+    "rougeL_precision": 0.4356224827949828,
+    "rougeL_recall": 0.10908982995651877,
+    "rougeL_f1": 0.17033263670792456,
+    "wall_time_seconds": 791.2410425000126,
+    "n_align": 40000,
+    "n_test": 10000
+  }
+}

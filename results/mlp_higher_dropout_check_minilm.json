@@ -1,0 +1,13 @@
+{
+  "attacker": "MLP",
+  "encoder": "minilm",
+  "dim": 384,
+  "dropout": 0.3,
+  "weight_decay": 0.0,
+  "rougeL_precision": 0.40458724594849593,
+  "rougeL_recall": 0.10009195867989047,
+  "rougeL_f1": 0.15664130503423768,
+  "wall_time_seconds": 454.2687088000239,
+  "n_align": 40000,
+  "n_test": 10000
+}

@@ -1,0 +1,8 @@
+{
+  "rouge_l_precision": 0.2545454545454545,
+  "rouge_l_recall": 0.12205127306541894,
+  "rouge_l_f1": 0.16385105619252713,
+  "content_precision": 0.0,
+  "content_recall": 0.0,
+  "content_f1": 0.0
+}

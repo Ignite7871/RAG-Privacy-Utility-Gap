@@ -1,0 +1,23 @@
+{
+  "dataset": "msmarco",
+  "encoder": "minilm",
+  "n_align": 1000,
+  "n_test": 500,
+  "checkpoint": "D:\\RAG\\checkpoints\\algen_generator\\checkpoint_epoch_99.pt",
+  "generator_model_name": "google/flan-t5-small",
+  "timing": {
+    "init": 2.6142726999969454,
+    "fit": 0.5739937000034843,
+    "attack": 2.361468100003549
+  },
+  "rouge_l": {
+    "precision": 0.23344840923786223,
+    "recall": 0.0949843573372097,
+    "f1": 0.1306452956254654
+  },
+  "token_f1": {
+    "precision": 0.3264423116268657,
+    "recall": 0.13357345229702422,
+    "f1": 0.18362861607046996
+  }
+}

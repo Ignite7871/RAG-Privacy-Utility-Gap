@@ -1,0 +1,56 @@
+{
+  "msmarco32/minilm": {
+    "all_ones_mask": {
+      "rouge_l_precision": 0.17160992371686137,
+      "rouge_l_recall": 0.1610085898650279,
+      "rouge_l_f1": 0.1648509290455353,
+      "content_precision": 0.11521485546617126,
+      "content_recall": 0.09591782266282199,
+      "content_f1": 0.10356757540770944
+    },
+    "ground_truth_mask": {
+      "rouge_l_precision": 0.1714988939131697,
+      "rouge_l_recall": 0.16091443781824427,
+      "rouge_l_f1": 0.16474556198176635,
+      "content_precision": 0.11504566354697934,
+      "content_recall": 0.0959329741779735,
+      "content_f1": 0.10349526939014027
+    }
+  },
+  "msmarco32/gtr": {
+    "all_ones_mask": {
+      "rouge_l_precision": 0.18884299610872224,
+      "rouge_l_recall": 0.18302395671688915,
+      "rouge_l_f1": 0.18490073790029354,
+      "content_precision": 0.13587079032079033,
+      "content_recall": 0.11424858812460778,
+      "content_f1": 0.12296050583429473
+    },
+    "ground_truth_mask": {
+      "rouge_l_precision": 0.18867808045832268,
+      "rouge_l_recall": 0.18279003858823417,
+      "rouge_l_f1": 0.18468298854454115,
+      "content_precision": 0.13592308247308246,
+      "content_recall": 0.11425666893268858,
+      "content_f1": 0.12301071884020567
+    }
+  },
+  "nq32/minilm": {
+    "all_ones_mask": {
+      "rouge_l_precision": 0.17690533662660488,
+      "rouge_l_recall": 0.1744873927574495,
+      "rouge_l_f1": 0.1738760386210436,
+      "content_precision": 0.11224614927556104,
+      "content_recall": 0.10144874922119504,
+      "content_f1": 0.10531043166333814
+    },
+    "ground_truth_mask": {
+      "rouge_l_precision": 0.1773020764645427,
+      "rouge_l_recall": 0.17411947438710146,
+      "rouge_l_f1": 0.1740524076432469,
+      "content_precision": 0.11230018331341861,
+      "content_recall": 0.100801130173576,
+      "content_f1": 0.10509741319523959
+    }
+  }
+}

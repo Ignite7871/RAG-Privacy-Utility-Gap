@@ -1,0 +1,42 @@
+{
+  "vanilla": {
+    "rouge_l_precision": 0.42066941114441114,
+    "rouge_l_recall": 0.105011804958088,
+    "rouge_l_f1": 0.16386156847927544,
+    "content_precision": 0.4682319264069264,
+    "content_recall": 0.08297523786906867,
+    "content_f1": 0.1361644237286698
+  },
+  "advenc_v1_cpu": {
+    "rouge_l_precision": 0.40529883033633035,
+    "rouge_l_recall": 0.10311339568265156,
+    "rouge_l_f1": 0.1602659074873118,
+    "content_precision": 0.4161291305916306,
+    "content_recall": 0.08938824277491851,
+    "content_f1": 0.1422590330056983
+  },
+  "advenc_v2_cpu": {
+    "rouge_l_precision": 0.38890331474081474,
+    "rouge_l_recall": 0.0925588488021017,
+    "rouge_l_f1": 0.14574896725942513,
+    "content_precision": 0.40087400793650796,
+    "content_recall": 0.046227974095560065,
+    "content_f1": 0.07933153810530298
+  },
+  "advenc_v2_gpu50k": {
+    "rouge_l_precision": 0.3299174852924853,
+    "rouge_l_recall": 0.07550771089158552,
+    "rouge_l_f1": 0.11989779361447421,
+    "content_precision": 0.08395595238095238,
+    "content_recall": 0.005423035136052997,
+    "content_f1": 0.009928730930147012
+  },
+  "advenc_v1_gpu50k": {
+    "rouge_l_precision": 0.3903483419358419,
+    "rouge_l_recall": 0.09816678084083685,
+    "rouge_l_f1": 0.15287029990460252,
+    "content_precision": 0.39374677128427127,
+    "content_recall": 0.07614031945426059,
+    "content_f1": 0.123164517189193
+  }
+}

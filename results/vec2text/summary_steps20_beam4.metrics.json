@@ -1,0 +1,80 @@
+{
+  "n_test": 200,
+  "setting": "MS MARCO passages truncated to 32 gtr-t5 tokens; victim embeddings from vec2text's own gtr-base embedder",
+  "vec2text_settings": {
+    "checkpoint": "jxm/gtr__nq__32",
+    "num_steps": 20,
+    "sequence_beam_width": 4
+  },
+  "vec2text": {
+    "vs_prefix": {
+      "rouge_l_precision": 0.8581770930403698,
+      "rouge_l_recall": 0.8272438326789598,
+      "rouge_l_f1": 0.8419923994151093,
+      "content_precision": 0.869388635809495,
+      "content_recall": 0.8375709410128914,
+      "content_f1": 0.8524065475665082
+    },
+    "vs_full": {
+      "rouge_l_precision": 0.8641203402499786,
+      "rouge_l_recall": 0.392176832077635,
+      "rouge_l_f1": 0.5248477267411381,
+      "content_precision": 0.876623862785821,
+      "content_recall": 0.3945324891344471,
+      "content_f1": 0.5302521689261084
+    },
+    "token_f1_vs_prefix": {
+      "precision": 0.9195671303240234,
+      "recall": 0.8873845498305948,
+      "f1": 0.9026796059362884
+    }
+  },
+  "linearprobe": {
+    "800": {
+      "vs_prefix": {
+        "rouge_l_precision": 0.2548699078699079,
+        "rouge_l_recall": 0.13064200456631103,
+        "rouge_l_f1": 0.1717740516067554,
+        "content_precision": 0.1275,
+        "content_recall": 0.01473261379143732,
+        "content_f1": 0.026209892403777853
+      },
+      "vs_full": {
+        "rouge_l_precision": 0.3615556665556665,
+        "rouge_l_recall": 0.0821269003466901,
+        "rouge_l_f1": 0.1310989458801051,
+        "content_precision": 0.155,
+        "content_recall": 0.008485678703735988,
+        "content_f1": 0.015891491199150443
+      },
+      "token_f1_vs_prefix": {
+        "precision": 0.37189671439671446,
+        "recall": 0.19003225421724218,
+        "f1": 0.2501814087322063
+      }
+    },
+    "5000": {
+      "vs_prefix": {
+        "rouge_l_precision": 0.31142329892329895,
+        "rouge_l_recall": 0.16514107030984246,
+        "rouge_l_f1": 0.21441370779781443,
+        "content_precision": 0.42192857142857143,
+        "content_recall": 0.08330043505256354,
+        "content_f1": 0.13468115696092545
+      },
+      "vs_full": {
+        "rouge_l_precision": 0.4143157675657676,
+        "rouge_l_recall": 0.09806068041072752,
+        "rouge_l_f1": 0.1549492748630504,
+        "content_precision": 0.4837619047619047,
+        "content_recall": 0.043411619507238715,
+        "content_f1": 0.07761686281651514
+      },
+      "token_f1_vs_prefix": {
+        "precision": 0.4873276445776446,
+        "recall": 0.2578885512910534,
+        "f1": 0.33520579799649
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "trivial_baseline": {
+    "uniform_logit0_baseline": 0.6931463479995728,
+    "marginal_frequency_baseline": 0.0075698187574744225,
+    "actual_final_decoder_loss": 0.007357947920435373
+  },
+  "downstream_attack": {
+    "nonadaptive_rougeL_precision": 0.33081931679431675,
+    "adaptive_rougeL_precision": 0.3715041924741925
+  },
+  "collapse_rank_centroid": {
+    "mean_cosine_sim": 0.014661794528365135,
+    "std_cosine_sim": 0.10208361595869064,
+    "CKA_vs_vanilla": 0.24442064762115479,
+    "effective_rank_95": 147,
+    "participation_ratio": 77.33027648925781,
+    "top_singular_value_fraction": 0.0356571264564991,
+    "centroid_norm": 0.13086305558681488,
+    "centroid_cos_sim_vs_vanilla": 0.09416081011295319,
+    "centroid_l2_dist_vs_vanilla": 0.16206906735897064
+  }
+}

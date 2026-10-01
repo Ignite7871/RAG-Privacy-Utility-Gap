@@ -1,0 +1,20 @@
+[
+  {
+    "encoder": "vanilla",
+    "mean_cosine_sim": 0.009344004094600677,
+    "std_cosine_sim": 0.07807135581970215,
+    "CKA_vs_vanilla": null
+  },
+  {
+    "encoder": "v1_defended",
+    "mean_cosine_sim": 0.020591456443071365,
+    "std_cosine_sim": 0.07834785431623459,
+    "CKA_vs_vanilla": 0.9823224544525146
+  },
+  {
+    "encoder": "v2_defended",
+    "mean_cosine_sim": 0.13509014248847961,
+    "std_cosine_sim": 0.07249701023101807,
+    "CKA_vs_vanilla": 0.6384353637695312
+  }
+]

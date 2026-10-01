@@ -1,0 +1,20 @@
+[
+  {
+    "encoder": "vanilla",
+    "effective_rank_95": 184,
+    "participation_ratio": 116.84103393554688,
+    "top_singular_value_fraction": 0.0253647081553936
+  },
+  {
+    "encoder": "v1_defended",
+    "effective_rank_95": 183,
+    "participation_ratio": 115.82945251464844,
+    "top_singular_value_fraction": 0.02793373167514801
+  },
+  {
+    "encoder": "v2_defended",
+    "effective_rank_95": 191,
+    "participation_ratio": 130.5507049560547,
+    "top_singular_value_fraction": 0.020334089174866676
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "n_queries": 200,
+  "n_corpus": 50000,
+  "vanilla": {
+    "recall@5": 0.885,
+    "recall@10": 0.97,
+    "ndcg@10": 0.6669849380528151
+  },
+  "gpu50k_defended": {
+    "recall@5": 0.0,
+    "recall@10": 0.0,
+    "ndcg@10": 0.0
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "attacker": "transfer_attack",
+  "dataset": "msmarco",
+  "victim_encoder": "minilm",
+  "surrogate_encoder": "gtr",
+  "n_align": 2000,
+  "n_test": 200,
+  "epochs": 30,
+  "batch_size": 16,
+  "adapter_epochs": 300,
+  "timing": {
+    "init": 3.4068822999834083,
+    "fit": 531.3116288000019,
+    "attack": 5.659458900016034
+  },
+  "rouge_l": {
+    "precision": 0.15249181541361292,
+    "recall": 0.0700747833046565,
+    "f1": 0.09337532593179945
+  },
+  "token_f1": {
+    "precision": 0.2027067350595488,
+    "recall": 0.0932116990763356,
+    "f1": 0.12420947236725359
+  }
+}

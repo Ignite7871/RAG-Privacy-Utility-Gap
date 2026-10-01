@@ -1,0 +1,25 @@
+{
+  "trivial_baseline": {
+    "v1": {
+      "uniform_logit0_baseline": 0.6931473016738892,
+      "marginal_frequency_baseline": 0.007482996676117182,
+      "actual_final_decoder_loss": 0.008207620025449803
+    },
+    "v2": {
+      "uniform_logit0_baseline": 0.6931474804878235,
+      "marginal_frequency_baseline": 0.007221239618957043,
+      "actual_final_decoder_loss": 0.006729766689240932
+    }
+  },
+  "vanilla_baseline": {
+    "rougeL_precision": 0.4199712698412698
+  },
+  "v1": {
+    "nonadaptive_rougeL_precision": 0.40564544455544455,
+    "adaptive_rougeL_precision": 0.41815365245865244
+  },
+  "v2": {
+    "nonadaptive_rougeL_precision": 0.3869871020646021,
+    "adaptive_rougeL_precision": 0.407207055999556
+  }
+}

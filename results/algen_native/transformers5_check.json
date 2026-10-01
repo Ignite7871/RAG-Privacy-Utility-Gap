@@ -1,0 +1,21 @@
+{
+  "transformers": "5.13.0",
+  "stage1": {
+    "exception": "ValueError",
+    "message": "You have modified the pretrained model configuration to control generation We detected the following values set - {'max_length': 32}. This strategy to control generation is not supported anymore. Please use and modify `model.generation_conf"
+  },
+  "stage2": {
+    "n": 8,
+    "n_empty": 7,
+    "outputs": [
+      "",
+      "",
+      "",
+      "",
+      "......",
+      "",
+      "",
+      ""
+    ]
+  }
+}
