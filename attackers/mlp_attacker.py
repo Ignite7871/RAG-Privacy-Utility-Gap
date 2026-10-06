@@ -1,6 +1,7 @@
 """MLP multi-label BCE probe for embedding inversion.
 
-Same attack family as LinearProbeAttacker (Morris et al.-style: predict, for every
+Same attack family as LinearProbeAttacker (bag-of-words inversion in the setting of
+Song and Raghunathan, CCS 2020: predict, for every
 vocabulary token, whether it appears in the source passage; reconstruct by re-ordering
 the top-scoring tokens by their mean position across the training corpus) but with the
 deeper head: d -> 1024 -> 1024 -> V, GELU activations, LayerNorm after each hidden layer,

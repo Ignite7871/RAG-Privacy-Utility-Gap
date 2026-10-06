@@ -1,9 +1,9 @@
 """Linear multi-label BCE probe for embedding inversion.
 
-Reimplements the attack from Morris et al., "Text Embeddings Reveal (Almost) As Much
-As Text" (EMNLP 2023): a linear head predicts, for every vocabulary token, whether it
-appears in the source passage, and reconstruction re-orders the top-scoring tokens by
-their mean position across the training corpus.
+A linear form of the bag-of-words inversion setting of Song and Raghunathan,
+"Information Leakage in Embedding Models" (CCS 2020): a linear head predicts, for every
+vocabulary token, whether it appears in the source passage, and reconstruction re-orders
+the top-scoring tokens by their mean position across the training corpus.
 
 This is not the ALGEN method of Chen/Xu/Bjerva (ACL 2025, github.com/siebeniris/ALGEN);
 that attack is run through algen.py.

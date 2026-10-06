@@ -1,4 +1,4 @@
-"""Vec2Text (Morris et al., 2024) vs LinearProbe, evaluated in Vec2Text's native setting.
+"""Vec2Text (Morris et al., 2023) vs LinearProbe, evaluated in Vec2Text's native setting.
 
 The released jxm/gtr__nq__32 inverter+corrector does NOT operate on this repo's cached GTR
 embeddings: its embedder is a bare mean-pooled gtr-t5-base encoder over at most 32 tokens,
