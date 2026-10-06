@@ -21,7 +21,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see CLAUDE.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 import datasets  # noqa: E402, F401
 
 from attackers.linear_probe import LinearProbeAttacker  # noqa: E402

@@ -1,4 +1,4 @@
-# HuggingFace imports MUST come before torch imports, or CUDA DLL conflicts occur on Windows (see claude.md)
+# HuggingFace imports MUST come before torch imports, or CUDA DLL conflicts occur on Windows (see README.md)
 import argparse
 from pathlib import Path
 

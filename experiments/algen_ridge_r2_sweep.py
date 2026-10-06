@@ -6,7 +6,7 @@ whether that divergence is already visible in the linear alignment fit
 itself, before generation.
 
 MUST be run under .venv-algen-legacy -- same reason as algen_alignment_quality.py
-(see claude.md: "Dual-venv setup").
+(see README.md, "Environments").
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 from attackers.algen import AlgenAttacker  # noqa: E402
 from experiments.algen_alignment_quality import ridge_r2  # noqa: E402
 

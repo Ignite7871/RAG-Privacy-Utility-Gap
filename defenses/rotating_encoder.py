@@ -1,23 +1,45 @@
-"""RotatingEncoderDefense: a keyed random orthogonal rotation applied post-encoding,
-rotated on a schedule (Option A).
+"""RotatingEncoderDefense: a keyed random orthogonal rotation applied to stored and query
+embeddings, with the key advancing per rotation window ("epoch").
 
-Design rationale (see conversation context, not reproduced here): DP noise and
-AdvEnc's gradient-based adversarial training both degrade the geometry retrieval
-depends on as a side effect of resisting inversion -- there's no guarantee the two
-objectives can be separated when the defense is learned. An orthogonal transformation
-sidesteps that tradeoff by construction: for any orthogonal R, <Rx, Ry> = <x, y>
-exactly (not approximately), so Recall@k/NDCG are mathematically identical to
-vanilla, regardless of R. Inversion resistance instead comes from *rotating* R over
-time: an attacker who collects alignment pairs during rotation window k learns a
-linear head calibrated to R_k's coordinate system; once the defender advances to
-R_{k+1}, that head is stale and the attacker needs a fresh O(d) alignment samples to
-re-adapt (Theorem 1). The corollary: rotate before an adversary can plausibly submit
-O(d) queries (empirically n*~200 for MiniLM, d=384) to keep an adaptive attacker
-perpetually below saturation.
+Row-vector convention: transform(X, k) = X @ R_k, where R_k is a d x d orthogonal matrix.
+This is the setting of the paper's key-rotation section, whose two propositions the code
+relies on.
 
-This file is ONLY the rotation primitive + its correctness tests (retrieval-neutrality,
-determinism, orthogonality). The attacker-side evaluation (query-budget-per-window
-sweep, the FM3-style bounded-saturation curve) is a separate, later piece.
+What the rotation guarantees
+  * Retrieval neutrality (Proposition 2). For any orthogonal R, <Rx, Ry> = <x, y> in exact
+    arithmetic, so inner-product rankings, Recall@k and NDCG@k are identical to the
+    unrotated ones whenever the corpus and the queries are rotated under the same R_k. In
+    float32 the Gram matrix agrees to about 1e-6 (the self-test below prints the value).
+  * Equivariance of ridge inversion (Proposition 3). W(XR, T) = R^T W(X, T), so an attacker
+    whose alignment pairs and test embeddings come from the same window does exactly as
+    well as against the unrotated encoder (approximately for the Adam-trained
+    LinearProbe, whose initialisation is not rotation-invariant). Rotation does not make
+    inversion harder in any window the attacker can observe.
+
+What it protects against
+  * Stale material only. A probe fit under R_j and applied under R_k != R_j sees inputs
+    rotated by the independent Haar-random matrix R_k R_j^T and is left with little beyond
+    the token prior. The measured effect is in results/rotation_both_metrics.csv.
+
+Scope (the paper's assumptions)
+  (i)   the key is secret and windows use independent Haar-random rotations;
+  (ii)  stored and query embeddings are rotated under the same key;
+  (iii) the attacker holds no row-aligned snapshots of the index from two windows: an
+        orthogonal Procrustes fit on m >= d matched rows recovers R_j^T R_k and undoes the
+        rotation (results/rotation_snapshot_linking.csv);
+  (iv)  the attacker's pairs per window are capped by the defender.
+Nothing is claimed against an attacker who violates (iii) or exceeds the cap in (iv). Treat
+rotation as a way to invalidate leaked material, not as a defense against an attacker who
+can query the current encoder.
+
+Implementation caveat: R_k is drawn from torch's non-cryptographic generator seeded with a
+31-bit function of (seed, epoch), so assumption (i) is idealised here. A deployment would
+derive R_k from a keyed cryptographic generator with a full-length secret.
+
+This file is ONLY the rotation primitive and its correctness tests (retrieval neutrality,
+determinism, orthogonality). The attacker-side evaluation is in
+experiments/rotation_eval_both_metrics.py (same window vs. next window) and
+experiments/prior_baseline_and_snapshot_linking.py (embedding-free floor, snapshot linking).
 """
 
 from __future__ import annotations

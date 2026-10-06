@@ -1,8 +1,7 @@
-"""One-off validation checkpoint: reproduce the paper's headline MLP-vs-LinearProbe
-comparison (Section VI-C) on the full 40k/10k MS MARCO split for MiniLM and BGE-large,
-to sanity-check MLPAttacker/LinearProbeAttacker against the original crossover pattern
-(MLP wins at low dimension, LinearProbe wins at high dimension) before trusting them for
-the full sweep. Not part of the regular experiment pipeline.
+"""MLPAttacker vs. LinearProbeAttacker on the full 40k/10k MS MARCO split for MiniLM
+(d=384) and BGE-large (d=1024). Results -> results/mlp_vs_linear_validation.json. The
+regularisation variants of the MLP head are in mlp_regularization_sweep.py,
+mlp_higher_dropout_check.py and mlp_combined_reg_check.py.
 """
 
 from __future__ import annotations
@@ -15,7 +14,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 from attackers.linear_probe import LinearProbeAttacker  # noqa: E402
 from attackers.mlp_attacker import MLPAttacker  # noqa: E402
 from attackers.metrics import rouge_l_corpus  # noqa: E402

@@ -7,17 +7,15 @@ attack sweep.
 
 MUST be run under .venv-algen-legacy, not .venv312 -- it instantiates
 AlgenAttacker, which loads the ALGEN generator checkpoint via transformers.
-See claude.md: "Dual-venv setup". The checkpoint is incompatible with
+See README.md, "Environments". The checkpoint is incompatible with
 transformers>=5.x and produces silently wrong *embeddings* there too, not
 just wrong generations -- so R^2/CKA computed under the main venv would be
-untrustworthy the same way attack() is.
+unreliable in the same way attack() is.
 
 CKA methodology: standard linear CKA (Kornblith et al. 2019, "Similarity of
 Neural Network Representations Revisited"), via the efficient feature-space
-formula. This repo doesn't have the paper's Section V text available to
-consult directly -- if Section V used a different variant (kernel/RBF CKA,
-minibatch/unbiased HSIC, etc.), these numbers won't match it exactly and
-this should be revisited against the actual paper text.
+formula. Kernel (RBF) CKA and minibatch/unbiased-HSIC variants give different
+values.
 """
 
 from __future__ import annotations
@@ -31,7 +29,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 from attackers.algen import AlgenAttacker  # noqa: E402
 
 import torch  # noqa: E402

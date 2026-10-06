@@ -2,7 +2,7 @@
 (dropout=0.3, weight_decay=0, see results/mlp_regularization_sweep_minilm.png) actually
 improve real attack precision on MS MARCO/MiniLM, before rerunning the full
 4-combination validation from results/mlp_vs_linear_validation.json? Baseline MLP on
-MiniLM there was rougeL_precision=0.3761 (paper: 0.536).
+MiniLM there was rougeL_precision=0.3761.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 from attackers.mlp_attacker import MLPAttacker  # noqa: E402
 from attackers.metrics import rouge_l_corpus  # noqa: E402
 
@@ -56,7 +56,6 @@ def main() -> None:
     }
     print(f"\nMLP_minilm (dropout=0.3): rougeL_precision={rouge['precision']:.4f} ({elapsed:.1f}s)")
     print("baseline (dropout=0.1) was: rougeL_precision=0.3761")
-    print("paper's reported value:    rougeL_precision=0.536")
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:

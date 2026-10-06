@@ -1,10 +1,10 @@
-"""Diagnostic checkpoint for the MLP-vs-LinearProbe validation gap (see
+"""Diagnostic for the MLP-vs-LinearProbe gap (see
 results/mlp_vs_linear_validation.json): trains MLPAttacker on MS MARCO/MiniLM only,
-at the paper's stated 50 epochs and at an extended 150 epochs, and plots both loss
+at the default 50 epochs and at an extended 150 epochs, and plots both loss
 curves. No attack()/beam search/BGE-large/LinearProbe involved -- this isolates whether
 the MLP head is underfitting (loss still declining at epoch 50) or plateaued
-(architecture/lr mismatch), per the two candidate explanations for why MLP lost to
-LinearProbe on MiniLM despite matching the paper's expected order on BGE-large.
+(architecture/lr mismatch), the two candidate explanations for why MLP lost to
+LinearProbe on MiniLM.
 """
 
 from __future__ import annotations
@@ -15,7 +15,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 from attackers.mlp_attacker import MLPAttacker  # noqa: E402
 
 import matplotlib  # noqa: E402

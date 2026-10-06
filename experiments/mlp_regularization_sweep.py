@@ -7,7 +7,7 @@ whether weight decay or higher dropout prevents the divergence.
 Carves the last 2,000 of MS MARCO/MiniLM's 40,000 alignment passages off as a held-out
 split (never seen during training) and trains three MLPAttacker configs for 50 epochs
 each, logging train-loss and held-out-loss every epoch:
-  1. baseline       -- dropout=0.1, weight_decay=0    (paper's stated config)
+  1. baseline       -- dropout=0.1, weight_decay=0    (default config)
   2. weight_decay    -- dropout=0.1, weight_decay=1e-2
   3. higher_dropout  -- dropout=0.3, weight_decay=0
 
@@ -24,7 +24,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 from attackers.mlp_attacker import MLPAttacker  # noqa: E402
 
 import matplotlib  # noqa: E402

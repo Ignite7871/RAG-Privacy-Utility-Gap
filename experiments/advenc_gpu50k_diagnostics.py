@@ -1,16 +1,15 @@
-"""Full diagnostics batch (Prompt 32) on the GPU-scale checkpoint
-(checkpoints/advenc_v2_gpu50k_minilm.pt), mirroring the four CPU-scale checks exactly
-(trivial baseline, downstream attack eval, collapse/CKA, effective rank + centroid
-shift) for direct comparability -- same methods, same 400-passage sample (first 400 of
-msmarco_minilm_test.pt), same vanilla baseline.
+"""Diagnostics on the GPU-scale checkpoint (checkpoints/advenc_v2_gpu50k_minilm.pt),
+mirroring the four CPU-scale checks exactly (trivial baseline, downstream attack eval,
+collapse/CKA, effective rank + centroid shift) for direct comparability -- same methods,
+same 400-passage sample (first 400 of msmarco_minilm_test.pt), same vanilla baseline.
 
-Answers the paper's central scale question: does more data (50,000 vs 1,600 pairs) and
-more training (20 vs 5 epochs) let AdvEnc-v2 mount a real defense, or does the same
-CPU-scale mechanism hold -- internal decoder converges near the trivial
-marginal-frequency baseline (not real reconstruction), the encoder drifts the
-embedding distribution toward a new centroid rather than removing separable structure
-(effective rank/participation ratio don't drop), and an adaptive attacker recovers
-almost all of the non-adaptive precision loss.
+For the scale comparison (50,000 vs 1,600 pairs, 20 vs 5 epochs) it records: whether the
+internal decoder's loss converges near the trivial marginal-frequency baseline, whether the
+encoder shifts the embedding distribution toward a new centroid (effective rank and
+participation ratio), and how much of the non-adaptive precision loss an adaptive
+attacker recovers.
+
+Results -> results/advenc/gpu50k_diagnostics.json
 """
 
 from __future__ import annotations
@@ -22,7 +21,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on
 # Windows). Empirically `datasets` must be imported before `sentence_transformers`
 # specifically, or the process crashes with an access violation -- see
 # experiments/advenc_cpu_scale_check.py. This must stay the first import in this file;

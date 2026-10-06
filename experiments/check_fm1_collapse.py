@@ -1,16 +1,13 @@
-"""Direct check of the paper's FM1 contrastive-collapse signature (Fig 1): does
-AdvEnc-defended encoder training actually compress passage embeddings toward each
-other (rising mean pairwise cosine similarity), independent of what the downstream
-attack numbers in results/advenc/cpu_scale_downstream_check.json show?
+"""Direct check of contrastive collapse: does AdvEnc-defended encoder training compress
+passage embeddings toward each other (rising mean pairwise cosine similarity),
+independent of what the downstream attack numbers in
+results/advenc/cpu_scale_downstream_check.json show?
 
-This is a direct measurement, no attacker involved: 400 passages (matching the paper's
-Fig 1 n=400), all pairwise cosine similarities (400 choose 2 = 79,800 pairs) for the
-vanilla encoder and each CPU-scale defended checkpoint, plus linear CKA (Kornblith et
-al. 2019, same formula as experiments/algen_alignment_quality.py) between vanilla and
-each defended encoder's embeddings on the same passages.
-
-Paper's Fig 1 numbers for reference: vanilla mean=0.024/std=0.118, v2-equivalent
-defended mean=0.107/std=0.084.
+This is a direct measurement, no attacker involved: 400 passages, all pairwise cosine
+similarities (400 choose 2 = 79,800 pairs) for the vanilla encoder and each CPU-scale
+defended checkpoint, plus linear CKA (Kornblith et al. 2019, same formula as
+experiments/algen_alignment_quality.py) between vanilla and each defended encoder's
+embeddings on the same passages.
 """
 
 from __future__ import annotations
@@ -22,7 +19,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on
 # Windows). Empirically `datasets` must be imported before `sentence_transformers`
 # specifically, or the process crashes with an access violation -- see
 # experiments/advenc_cpu_scale_check.py.
@@ -118,8 +115,6 @@ def main() -> None:
     for row in rows:
         cka_str = f"{row['CKA_vs_vanilla']:.4f}" if row["CKA_vs_vanilla"] is not None else "--"
         print(f"{row['encoder']:<14} {row['mean_cosine_sim']:>16.4f} {row['std_cosine_sim']:>16.4f} {cka_str:>16}")
-
-    print("\npaper's Fig 1 reference: vanilla mean=0.024/std=0.118, v2-equivalent defended mean=0.107/std=0.084")
 
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT_PATH, "w", encoding="utf-8") as f:

@@ -21,7 +21,7 @@ matching their lowest-cost configuration.
 
 from __future__ import annotations
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 from transformers import GPT2LMHeadModel, GPT2TokenizerFast
 
 from attackers.base import InversionAttacker

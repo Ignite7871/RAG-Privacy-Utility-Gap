@@ -34,7 +34,7 @@ _resource_stub.RLIM_INFINITY = -1
 _resource_stub.setrlimit = lambda *a, **k: None
 sys.modules["resource"] = _resource_stub
 
-# HuggingFace import must precede torch import (see CLAUDE.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 import datasets  # noqa: E402, F401
 
 from attackers.linear_probe import LinearProbeAttacker  # noqa: E402

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# ALGEN with n_test=500 (the earlier sweep used n_test=50) for MS MARCO / NQ x 4 encoders x 4 budgets.
-# Runs under .venv-algen-legacy (transformers==4.52.4); see CLAUDE.md dual-venv note.
+# ALGEN with n_test=500 for MS MARCO / NQ x 4 encoders x 4 budgets.
+# Runs under .venv-algen-legacy (transformers==4.52.4); see README.md, "Environments".
 # Optional first arg: space-separated "dataset:encoder" pairs (default: the 8 clean pairs).
 cd "$(dirname "$0")/.."
 PY=.venv-algen-legacy/Scripts/python.exe

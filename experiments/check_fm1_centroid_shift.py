@@ -1,10 +1,10 @@
-"""Final bounded check in the FM1 investigation (see check_fm1_collapse.py,
-check_fm1_rank.py): does v2's raw pairwise-cosine-similarity collapse come from a
-shared-direction/centroid shift rather than reduced effective rank? If so, this is
-also the mechanism that would explain check_fm1_collapse's + advenc_cpu_scale_check's
-non-adaptive-vs-adaptive gap: a non-adaptive attacker trained on vanilla embedding
-statistics would be thrown off by a shifted centroid, while an adaptive attacker
-retraining on the defended distribution directly wouldn't care where the centroid sits.
+"""Follow-up to check_fm1_collapse.py and check_fm1_rank.py: does v2's raw
+pairwise-cosine-similarity collapse come from a shared-direction/centroid shift rather
+than reduced effective rank? If so, this would also explain the non-adaptive vs. adaptive
+gap seen in check_fm1_collapse.py and advenc_cpu_scale_check.py: a non-adaptive attacker
+trained on vanilla embedding statistics would be thrown off by a shifted centroid, while an
+adaptive attacker retraining on the defended distribution does not care where the centroid
+sits.
 
 Uses the same 400 passages / three encoders (vanilla, v1_defended, v2_defended) as the
 other two checks.
@@ -19,7 +19,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on
 # Windows). Empirically `datasets` must be imported before `sentence_transformers`
 # specifically, or the process crashes with an access violation -- see
 # experiments/advenc_cpu_scale_check.py.

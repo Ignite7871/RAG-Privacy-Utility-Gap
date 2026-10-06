@@ -1,48 +1,25 @@
-"""Rebuilds the DP defense evaluation (paper Table IX / Section VI-D) from scratch.
-
-No prior DP result file exists anywhere in results/ (checked exhaustively -- the only
-DP-related content in the whole repo is prose/table text in paper/main.tex). Every
-number in the DP table, including the 0.406 undefended baseline, was carried over from
-the pre-rebuild draft and was never actually re-run against this rebuilt codebase (see
-memory: old_paper_numbers_not_authoritative). This produces the first verified DP sweep.
+"""Gaussian DP defense sweep: retrieval utility and non-adaptive inversion over epsilon.
 
 Method: Gaussian mechanism (defenses/gaussian_dp.py), sigma = sqrt(2*ln(1.25/delta))/eps,
 delta=1e-5, applied as i.i.d. per-coordinate noise then L2-renormalised.
 
-Per epsilon in {1, 2, 5, 10, 20, 50, 100, 200, 500, inf}:
-  1. Non-adaptive inversion: LinearProbeAttacker fit ONCE on VANILLA alignment
-     embeddings (the eavesdropper doesn't know about the defense -- Definition 1's
-     non-adaptive framing), attacked against DP-noised test-split embeddings.
-     ROUGE-L precision reported over the full n_test=10,000 split (attack() is a cheap
-     forward pass, no training, so full-scale test evaluation is fine).
-  2. Retrieval: reuses experiments/advenc_retrieval_eval.py's Recall@5/10/NDCG@10
-     harness (sample_queries_with_ground_truth, recall_and_ndcg), but with CLEAN
-     (unnoised) queries against a DP-NOISED corpus index -- matching the paper's "noise
-     added to STORED embeddings" framing: queries are embedded fresh at query time and
-     are not part of what's persisted/leaked, so they are not DP-noised themselves.
-     This deliberately differs from advenc_retrieval_eval.py's symmetric protocol
-     (noised queries + noised corpus), because AdvEnc replaces the encoder end-to-end
-     while DP only perturbs what's written to disk.
+Per epsilon in {1, 2, 5, 10, 20, 50, 100, 200, 500, inf}, plus 25, 30 and 40 (appended at
+the end of EPSILONS so the seeds of the earlier points do not change):
+  1. Non-adaptive inversion: LinearProbeAttacker fit ONCE on VANILLA alignment embeddings
+     (the eavesdropper does not know about the defense), attacked against DP-noised
+     test-split embeddings. Plain and content-word ROUGE-L precision are reported over the
+     full n_test=10,000 split (attack() is a cheap forward pass with no training).
+  2. Retrieval: reuses experiments/advenc_retrieval_eval.py's Recall@5/10/NDCG@10 harness
+     (sample_queries_with_ground_truth, recall_and_ndcg), but with CLEAN (unnoised) queries
+     against a DP-NOISED corpus index, because the noise is added to STORED embeddings:
+     queries are embedded fresh at query time and are not part of what is persisted, so
+     they are not DP-noised. This deliberately differs from advenc_retrieval_eval.py's
+     symmetric protocol (defended queries + defended corpus), because AdvEnc replaces the
+     encoder end to end while DP only perturbs what is written to disk.
 
-epsilon=inf (sigma=0) is the vanilla baseline row. This is also the number that
-resolves whether Table I's 0.381, Table VIII's 0.4199, or something else is the real
-MiniLM/full-corpus/n_align=40k LinearProbe baseline -- the three-way discrepancy
-flagged in the prior main.tex consistency pass.
-
-Runtime note (revised): an initial version of this script used n_align=2,000 for the
-attacker fit to keep runtime down. That run's vanilla-baseline row (epsilon=inf) came
-back at 0.3748, close to Table I's 0.381 but 12% off Table VIII's 0.4199 -- a gap far
-outside this paper's own established FM3 noise band (CV=1.2%, n=200-10,000), which
-would predict n=2,000 is already well past saturation for d=384. A direct confirmatory
-re-fit at the full n_align=40,000 (experiments/linearprobe_minilm_baseline_recheck.py)
-reproduced Table VIII's 0.4199 almost exactly (0.4200), not Table I's 0.381 -- meaning
-n_align=2,000 was itself undershooting for reasons not explained by the established
-saturation curve, and Table I's 0.381 / the old DP table's 0.406 are both stale.
-Since the fit only needs to happen ONCE regardless of epsilon count (it depends only on
-vanilla embeddings) and full-scale fitting turned out to cost ~316s -- not the
-300-800s originally guessed as a multi-fit cost -- there is no runtime reason to stay
-at the smaller, apparently-unreliable n_align. This version fits on the full
-n_align=40,000 alignment set, matching Table I/Table VIII's stated methodology exactly.
+epsilon=inf (sigma=0) is the vanilla baseline row. The attacker is fit on the full
+n_align=40,000 alignment set. The fit happens once, since it depends only on vanilla
+embeddings, and takes about 316s on the RTX 4060 Laptop GPU.
 """
 
 from __future__ import annotations
@@ -55,7 +32,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on
 # Windows). Must stay the first import in this file (see advenc_retrieval_eval.py).
 import datasets  # noqa: E402, F401
 
@@ -117,10 +94,8 @@ def main() -> None:
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
 
-    # Full n_align=40,000 alignment set, matching Table I / Table VIII's stated
-    # methodology exactly (see module docstring for why the smaller-subset version of
-    # this script was abandoned). Fit ONCE on vanilla embeddings -- the eavesdropper
-    # never sees the defended distribution (Definition 1).
+    # Full n_align=40,000 alignment set. Fit ONCE on vanilla embeddings -- the
+    # non-adaptive eavesdropper never sees the defended distribution.
     fit_texts = align_texts
     fit_embeddings = vanilla_align_emb
     n_align_used = len(fit_texts)

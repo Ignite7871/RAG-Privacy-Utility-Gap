@@ -5,14 +5,13 @@ As Text" (EMNLP 2023): a linear head predicts, for every vocabulary token, wheth
 appears in the source passage, and reconstruction re-orders the top-scoring tokens by
 their mean position across the training corpus.
 
-Note: an earlier draft of this codebase mislabeled this class "ALGEN". It is NOT the
-ALGEN method of Chen/Xu/Bjerva (ACL 2025, github.com/siebeniris/ALGEN) -- that is
-implemented separately in algen.py.
+This is not the ALGEN method of Chen/Xu/Bjerva (ACL 2025, github.com/siebeniris/ALGEN);
+that attack is run through algen.py.
 """
 
 from __future__ import annotations
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 from transformers import AutoTokenizer
 
 from attackers.base import InversionAttacker

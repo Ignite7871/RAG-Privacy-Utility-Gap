@@ -19,7 +19,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace imports must come before torch (see CLAUDE.md)
+# HuggingFace imports must come before torch (see README.md)
 import datasets  # noqa: E402, F401
 from sentence_transformers import SentenceTransformer  # noqa: E402
 from transformers import AutoTokenizer  # noqa: E402

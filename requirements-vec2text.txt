@@ -1,3 +1,6 @@
+# PyTorch 2.6.0+cu124 (CUDA 12.4 build) is hosted on the PyTorch package index, not on PyPI;
+# the extra index below is what lets this file resolve. See README.md, section "PyTorch".
+--extra-index-url https://download.pytorch.org/whl/cu124
 absl-py==2.5.0
 accelerate==1.15.0
 aiohappyeyeballs==2.7.1

@@ -1,10 +1,9 @@
-"""Last regularization variant for the MLP-vs-LinearProbe gap (see
+"""Regularization variant for the MLP-vs-LinearProbe gap (see
 results/mlp_regularization_sweep_minilm.png, results/mlp_higher_dropout_check_minilm.json):
-combines the two partial wins -- higher_dropout (0.3) and a much lighter weight_decay
-(1e-3, ten times lighter than the 1e-2 that underfit badly) -- in one config, on
-MS MARCO/MiniLM only. Bounded, final attempt: not chasing the paper's 0.536, just
-checking whether combining the two regularization knobs beats higher_dropout alone
-(0.4046) meaningfully.
+combines the two partial improvements -- higher_dropout (0.3) and a much lighter
+weight_decay (1e-3, ten times lighter than the 1e-2 that underfit badly) -- in one config,
+on MS MARCO/MiniLM only. It checks whether combining the two regularization knobs beats
+higher_dropout alone (0.4046) meaningfully.
 
 Two phases:
   1. Same 38k/2k held-out split as the regularization sweep, to report train_loss and
@@ -22,7 +21,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 from attackers.mlp_attacker import MLPAttacker  # noqa: E402
 from attackers.metrics import rouge_l_corpus  # noqa: E402
 

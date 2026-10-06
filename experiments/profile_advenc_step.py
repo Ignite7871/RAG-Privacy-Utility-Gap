@@ -1,22 +1,20 @@
-"""One-off diagnostic (not a training run): profile exactly 5 AdvEnc training steps
-with the batch=32 + decoupled-forward-pass fix (see defenses/adv_encoder.py's train()),
-to confirm whether peak_reserved CUDA memory now stays under the RTX 4060 Laptop's
-8188MB card and whether per-step time stabilizes, before committing to the full
-50k/20-epoch gpu50k run.
+"""Memory/timing diagnostic (not a training run): profile exactly 5 AdvEnc training steps
+at batch=32 with the decoupled forward pass (see defenses/adv_encoder.py's train()), to
+check that peak_reserved CUDA memory stays under the RTX 4060 Laptop's 8188MB card and
+that per-step time stabilizes, before the full 50k-pair/20-epoch gpu50k run.
 
-Baseline (batch=128, shared anchor/positive_emb across both steps) hit
-peak_reserved=14690MB -- 1.8x the physical card -- and erratic 3.8-6.5s/step timing
-after step 1. This version mirrors train()'s current logic exactly: the decoder step
-recomputes positive_emb via a fresh no_grad forward pass (freed before the encoder
-step begins) instead of reusing a graph-attached tensor.
+For reference, batch=128 with the anchor/positive embeddings shared across both steps
+reached peak_reserved=14690MB (1.8x the physical card) and erratic 3.8-6.5s/step timing
+after step 1. The profiled logic mirrors train(): the decoder step recomputes positive_emb
+via a fresh no_grad forward pass (freed before the encoder step begins) instead of reusing
+a graph-attached tensor.
 
 Every phase is bracketed by torch.cuda.synchronize() + time.perf_counter(), since
-unsynchronized CUDA calls return before the GPU work is actually done and would lie
-about where time is going. Phases now map directly to train()'s two blocks:
-decoder_step (no_grad positive encode + decoder forward + backward + optimizer.step)
-and encoder_step (grad-enabled anchor+positive encode + InfoNCE + decoder-frozen
-forward + backward + optimizer.step) -- there's no longer a separate shared
-"encode_forward" phase, since each step now does its own encoding.
+unsynchronized CUDA calls return before the GPU work is actually done and would
+misattribute time. Phases map to train()'s two blocks: decoder_step (no_grad positive
+encode + decoder forward + backward + optimizer.step) and encoder_step (grad-enabled
+anchor+positive encode + InfoNCE + decoder-frozen forward + backward + optimizer.step);
+each step does its own encoding.
 """
 
 from __future__ import annotations
@@ -28,7 +26,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on
 # Windows). Empirically `datasets` must be imported before `sentence_transformers`
 # specifically, or the process crashes with an access violation -- see
 # experiments/advenc_cpu_scale_check.py.

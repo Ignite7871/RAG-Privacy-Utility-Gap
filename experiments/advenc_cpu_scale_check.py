@@ -1,4 +1,4 @@
-"""CPU-scale AdvEnc sanity checks (before any GPU-scale/50k run):
+"""CPU-scale AdvEnc sanity checks:
 
 1. Trivial-baseline BCE check: is the internal adversarial decoder's final training
    loss (see results/advenc/{v1,v2}_cpu_minilm_trainlog.json) actually better than a
@@ -16,8 +16,8 @@
    could find almost immediately given severe class imbalance, and is the meaningful
    comparison point for the observed ~0.007-0.08 decoder losses.
 
-2. The actual downstream attack eval (the Table IV/VII-equivalent result): freeze each
-   CPU-scale defended encoder checkpoint, fit LinearProbeAttacker two ways --
+2. The downstream attack evaluation: freeze each CPU-scale defended encoder
+   checkpoint, fit LinearProbeAttacker two ways --
    non-adaptive (fit on VANILLA embeddings, attack the DEFENDED encoder's test
    embeddings) and adaptive (fit AND attack on the DEFENDED encoder's embeddings) --
    and report ROUGE-L precision against the vanilla-encoder baseline. This is distinct
@@ -34,7 +34,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows).
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows).
 # Empirically this specifically requires `datasets` to be imported before
 # `sentence_transformers` -- importing sentence_transformers first crashes the
 # process with an access violation (STATUS_ACCESS_VIOLATION) on this machine, not a

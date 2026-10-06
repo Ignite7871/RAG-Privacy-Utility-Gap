@@ -1,28 +1,18 @@
-"""Minimal retrieval-quality evaluation harness for AdvEnc-v2 at GPU scale.
+"""Retrieval-quality evaluation (Recall@5/10, NDCG@10) for the GPU-scale AdvEnc-v2
+encoder; the query-sampling and scoring helpers are reused by the other retrieval scripts.
 
-No such harness existed anywhere in this repo before this file (checked
-experiments/, attackers/, defenses/, data/, claude.md, and memory -- the only
-Recall@5/NDCG mentions anywhere are leftover prose/table text in paper/main.md's
-"Differential Privacy Defense" section, tab:dp_defense, from the prior draft; no code
-producing those numbers exists, and per memory (old_paper_numbers_not_authoritative)
-that draft's numbers aren't to be trusted anyway). This reimplements the protocol
-described there -- "retrieval utility (Recall@5 against the unperturbed index)" --
-from scratch, since nothing was reusable beyond the description.
+Protocol (symmetric, deployment-style): 200 MS MARCO queries are encoded once with the
+vanilla encoder and once with the defended encoder; each is evaluated against a corpus
+index built with the SAME encoder (vanilla queries vs vanilla-encoded corpus; defended
+queries vs defended-encoded corpus). This matches a deployment that switches to the
+defended encoder end to end, rather than mixing clean queries with a perturbed index.
 
-Protocol (symmetric, realistic-deployment): 200 MS MARCO queries are encoded once with
-the vanilla encoder and once with the GPU-scale-v2 defended encoder; each is evaluated
-against a corpus index built with the SAME encoder (vanilla queries vs vanilla-encoded
-corpus; defended queries vs defended-encoded corpus) -- matching what an actual
-deployment looks like if it switches to the defended encoder end-to-end, rather than
-mixing clean queries against a noised index the way some DP literature does.
-
-Corpus: the same 50,000-passage MS MARCO pool used throughout this investigation
+Corpus: the 50,000-passage MS MARCO pool used throughout the repository
 (data/cache/msmarco_minilm_{align,test}.pt, 40k+10k). Queries and their ground-truth
 relevant passage are sampled by re-streaming MS MARCO v2.1 and keeping rows whose
-is_selected passage text is a member of that same 50k-passage pool -- by construction,
-since the pool was built by unrolling passage_text across that same stream's early
-rows (data/encode.py), nearly every early row's own selected passage is already in it,
-so this is cheap (no need to scan far into the stream).
+is_selected passage text is a member of that same 50k-passage pool. The pool was built
+from the passage_text of that stream's early rows (data/encode.py), so nearly every early
+row's own selected passage is already in it and little of the stream needs to be scanned.
 """
 
 from __future__ import annotations
@@ -35,7 +25,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on
 # Windows). Empirically `datasets` must be imported before `sentence_transformers`
 # specifically, or the process crashes with an access violation -- see
 # experiments/advenc_cpu_scale_check.py. Must stay the first import in this file.

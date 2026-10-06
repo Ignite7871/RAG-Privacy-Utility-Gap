@@ -1,9 +1,7 @@
 """Adaptive attackers vs. the adversarially trained encoders, across alignment budgets.
 
-Fills the gap between the single-budget results in Tables 4-5 (adaptive attacker fit on the full
-40k alignment set) and the paper's claim that an adaptive attacker recovers inversion capability
-at realistic budgets: for each defended MiniLM checkpoint (AdvEnc-v1 CPU, AdvEnc-v2 CPU,
-AdvEnc-v2 GPU/50k) and for the vanilla encoder, fit LinearProbe (3 seeds) and the MLP attacker
+For each defended MiniLM checkpoint (AdvEnc-v1 CPU, AdvEnc-v2 CPU, AdvEnc-v2 GPU/50k) and
+for the vanilla encoder, fit LinearProbe (3 seeds) and the MLP attacker
 (1 seed) on n in {200, 1000, 5000, 10000, 40000} alignment pairs encoded by THAT encoder, and score
 on the same 2,000-passage test subset. Defended embeddings are encoded once and cached in
 data/cache/advenc_*.pt (same format as data/encode.py).
@@ -101,7 +99,7 @@ def main() -> None:
                     r = full_scores(atk.attack(test_emb), test_txt)
                     bce = ""
                     if attacker == "linearprobe":
-                        # Held-out multi-label BCE of the fitted linear head (FM2 check: is the defended
+                        # Held-out multi-label BCE of the fitted linear head (is the defended
                         # embedding space easier for a linear head to fit than the vanilla one?).
                         with torch.no_grad():
                             tgt = build_presence_targets(texts_to_token_ids(atk.tokenizer, test_txt)).to(atk.device)

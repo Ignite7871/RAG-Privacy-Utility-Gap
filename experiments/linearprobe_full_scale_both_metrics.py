@@ -1,6 +1,6 @@
 """LinearProbe at full scale (n_align=40,000, n_test=10,000) on both corpora and all four encoders,
 recording standard and content-word ROUGE-L, plus the context-free (embedding-free) floor on the
-same test passages. Replaces the standard-metric-only table for the paper's main attack comparison.
+same test passages. This is the paper's main attack comparison.
 
 Results -> results/linearprobe_full_scale_both_metrics.csv (resumable)
 """
@@ -15,7 +15,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see CLAUDE.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 import datasets  # noqa: E402, F401
 
 from attackers.linear_probe import LinearProbeAttacker  # noqa: E402

@@ -1,14 +1,14 @@
-"""Bounded sanity check (before accepting Recall@5=0 from
+"""Sanity check (before accepting Recall@5=0 from
 experiments/advenc_retrieval_eval.py as real): is the query-passage relationship in
 the GPU-scale defended encoder genuinely destroyed (true-positive similarity
 indistinguishable from random negatives), or does a real but weak signal survive that
 a ranking metric could hide entirely (true-positive systematically above random, but
 still losing to closer negatives)?
 
-Precedent for being skeptical of a suspiciously clean zero: the real-ALGEN checkpoint
-silently producing empty-string decodes under the wrong transformers version (see
-claude.md's "Dual-venv setup" note) -- an exact-zero, discontinuous result that turned
-out to be a plumbing bug, not a real effect. Recall@5=0/200 has the same shape.
+An exact zero can come from plumbing rather than from the encoder: the real-ALGEN
+checkpoint silently produces empty-string decodes under the wrong transformers version (see
+README.md, "Environments"). Recall@5=0/200 has the same shape, so this check rules out
+that kind of artifact.
 
 Reuses the exact same 200 queries, ground truth, and corpus/encoder loading path as
 advenc_retrieval_eval.py for a direct apples-to-apples comparison -- no ranking
@@ -26,7 +26,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on
 # Windows). Empirically `datasets` must be imported before `sentence_transformers`
 # specifically, or the process crashes with an access violation -- see
 # experiments/advenc_cpu_scale_check.py. Must stay the first import in this file.

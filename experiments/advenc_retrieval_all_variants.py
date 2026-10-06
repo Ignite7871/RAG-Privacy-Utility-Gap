@@ -1,9 +1,9 @@
 """Retrieval utility of every AdvEnc variant (vanilla, v1 CPU, v2 CPU, v2 GPU/50k).
 
 Extends experiments/advenc_retrieval_eval.py (200 queries, GPU-scale v2 only) to all defended
-checkpoints and 1,000 queries, with percentile-bootstrap 95% CIs. In particular this measures
-AdvEnc-v1 (trained on real query-passage pairs), which the paper previously left unevaluated.
-Protocol is unchanged: queries and the 50k corpus are both encoded by the SAME encoder.
+checkpoints and 1,000 queries, with percentile-bootstrap 95% CIs. This includes AdvEnc-v1
+(trained on real query-passage pairs). Protocol is unchanged: queries and the 50k corpus are
+both encoded by the SAME encoder.
 
 Results -> results/advenc/retrieval_all_variants.json
 """

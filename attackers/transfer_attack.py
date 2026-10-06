@@ -48,7 +48,7 @@ Deviations from the reference implementation
 
 from __future__ import annotations
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 from attackers.base import InversionAttacker
 from attackers.geia import GEIAAttacker
 import torch

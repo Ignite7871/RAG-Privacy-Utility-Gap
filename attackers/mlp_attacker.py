@@ -3,24 +3,23 @@
 Same attack family as LinearProbeAttacker (Morris et al.-style: predict, for every
 vocabulary token, whether it appears in the source passage; reconstruct by re-ordering
 the top-scoring tokens by their mean position across the training corpus) but with the
-deeper head described in the paper's Section VI-C: d -> 1024 -> 1024 -> V, GELU
-activations, LayerNorm after each hidden layer, dropout=0.1 by default (configurable --
-see "Regularization" note below). Everything else -- BCE loss over binary token-presence
-targets, top-K=16 reconstruction, mean-corpus-position reordering -- is identical to
-LinearProbeAttacker; only the head architecture and epoch count differ.
+deeper head: d -> 1024 -> 1024 -> V, GELU activations, LayerNorm after each hidden layer,
+dropout=0.1 by default (configurable -- see "Regularization" note below). Everything else
+-- BCE loss over binary token-presence targets, top-K=16 reconstruction,
+mean-corpus-position reordering -- is identical to LinearProbeAttacker; only the head
+architecture and epoch count differ.
 
-Regularization: validation on MS MARCO/MiniLM found the paper's stated config
-(dropout=0.1, no weight decay, 50 epochs) drives training BCE loss to ~0 well before
-epoch 50, i.e. the deeper head overfits the alignment set rather than being
-undertrained (see results/mlp_loss_curve_minilm.png,
-results/mlp_regularization_sweep_minilm.png). dropout and weight_decay are exposed as
-constructor arguments so this can be tuned per encoder; defaults are unchanged from the
-paper's stated config.
+Regularization: with the default configuration (dropout=0.1, no weight decay, 50 epochs)
+the training BCE loss on MS MARCO/MiniLM reaches ~0 well before epoch 50, i.e. the deeper
+head overfits the alignment set rather than being undertrained (see
+results/mlp_loss_curve_minilm.png, results/mlp_regularization_sweep_minilm.png). dropout
+and weight_decay are exposed as constructor arguments so they can be tuned per encoder;
+the defaults are the configuration used for the main comparison.
 """
 
 from __future__ import annotations
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 from transformers import AutoTokenizer
 
 from attackers.base import InversionAttacker

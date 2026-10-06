@@ -16,7 +16,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see CLAUDE.md)
+# HuggingFace import must precede torch import (see README.md)
 from attackers.algen import AlgenAttacker, _tokenize_with_punctuation  # noqa: E402
 from attackers.metrics import full_scores  # noqa: E402
 

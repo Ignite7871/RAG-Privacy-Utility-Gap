@@ -4,7 +4,7 @@ Runs entirely under .venv312 -- it never imports attackers.algen or
 transformers itself. Each (dataset, encoder, n_align) combination is
 dispatched as a subprocess to .venv-algen-legacy's python executable running
 attackers/run_algen_legacy.py, which is pinned to transformers==4.52.4 for
-the ALGEN checkpoint (see claude.md: "Dual-venv setup"). This keeps the
+the ALGEN checkpoint (see README.md, "Environments"). This keeps the
 transformers version split entirely at the process boundary.
 """
 
@@ -25,7 +25,7 @@ DEFAULT_N_ALIGN_SWEEP = [50, 200, 1000, 2000]
 def run_one(dataset: str, encoder: str, n_align: int, n_test: int) -> None:
     if not LEGACY_PYTHON.exists():
         raise FileNotFoundError(
-            f"{LEGACY_PYTHON} not found -- create .venv-algen-legacy first (see claude.md)"
+            f"{LEGACY_PYTHON} not found -- create .venv-algen-legacy first (see README.md)"
         )
 
     print(f"=== {dataset}/{encoder} n_align={n_align} n_test={n_test} ===")

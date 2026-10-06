@@ -1,6 +1,5 @@
 """Standalone ALGEN attack runner, meant to be invoked under .venv-algen-legacy
-(transformers==4.52.4) -- NOT under the main .venv312 (see claude.md: "Dual-venv
-setup"). Reads cached embeddings produced by the main venv's data/encode.py,
+(transformers==4.52.4) -- NOT under the main .venv312 (see README.md, "Environments"). Reads cached embeddings produced by the main venv's data/encode.py,
 runs AlgenAttacker fit()+attack(), and writes results to
 results/algen/{dataset}_{encoder}_n{n_align}.json.
 
@@ -24,7 +23,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 # before `attackers.algen` is importable as a package.
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 from attackers.algen import AlgenAttacker  # noqa: E402
 from attackers.metrics import rouge_l_corpus, token_f1_corpus  # noqa: E402
 

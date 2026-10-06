@@ -1,4 +1,4 @@
-"""AdvEnc: adversarial encoder training defense, paper Section V-A.
+"""AdvEnc: adversarial encoder training defense.
 
 Min-max training between a frozen-per-step decoder Dphi (the "attacker" during
 training) and a sentence-transformers encoder Etheta being fine-tuned to resist it,
@@ -12,14 +12,13 @@ sg[.] is stop-gradient. The decoder step trains Dphi to invert the encoder's CUR
 (InfoNCE) while maximizing the (now-frozen) decoder's reconstruction loss, i.e.
 degrading its own invertibility against the decoder it just trained. This alternates
 every batch: decoder step first (train the attacker against the current encoder), then
-encoder step (train the encoder against the just-updated attacker) -- see "Min-max
-loop mechanics" below for exactly how stop-gradient / frozen-but-differentiable are
-implemented, and the "Ambiguities flagged for review" section at the bottom of this
-file for everything the paper excerpt underspecifies.
+encoder step (train the encoder against the just-updated attacker). The comments in
+train() show how stop-gradient and the frozen-but-differentiable decoder are implemented;
+the implementation notes at the bottom of this file list the fixed hyperparameters and
+design choices.
 
 x is always the passage/document side of a pair (the content actually stored in a RAG
-vector DB, and so the thing an inversion attacker would target) -- not the query. See
-"x = query or passage?" below.
+vector DB, and so the thing an inversion attacker would target) -- not the query.
 """
 
 from __future__ import annotations
@@ -33,7 +32,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
-# HuggingFace import must precede torch import (see claude.md: CUDA DLL conflicts on Windows)
+# HuggingFace import must precede torch import (see README.md: CUDA DLL conflicts on Windows)
 import datasets  # noqa: E402
 from sentence_transformers import SentenceTransformer  # noqa: E402
 from transformers import AutoTokenizer  # noqa: E402
@@ -49,9 +48,9 @@ import torch  # noqa: E402
 import torch.nn as nn  # noqa: E402
 import torch.nn.functional as F  # noqa: E402
 
-# AdvEnc-v1 (q-p) and AdvEnc-v2 (self), per the paper's stated configs. lambda_ret and
-# per-run hyperparameters (lr, batch size, temperature) are NOT given in the paper
-# excerpt this was implemented against -- see "Unspecified hyperparameters" below.
+# AdvEnc-v1 (query-passage pairs) and AdvEnc-v2 (self-pairs). lambda_ret, the learning
+# rates and the InfoNCE temperature are fixed implementation defaults, not tuned (see the
+# implementation notes at the bottom of this file).
 LAMBDA_RET = 1.0
 ADV_ENC_CONFIGS: dict[str, dict] = {
     "v1": {"lambda_priv": 0.3, "epochs": 3, "pair_mode": "query_passage"},
@@ -61,8 +60,8 @@ ADV_ENC_CONFIGS: dict[str, dict] = {
     "v2w": {"lambda_priv": 0.3, "epochs": 3, "pair_mode": "self"},
 }
 
-# CPU scale matches the paper's stated small-scale config (Table IV); gpu50k is the
-# GPU-scale re-evaluation (Table VII), 50,000 pairs for both variants.
+# Training pairs per scale: cpu is the small-scale configuration (1,000 and 1,600 pairs);
+# gpu50k is the GPU-scale configuration, 50,000 pairs for both variants.
 SCALE_N_PAIRS: dict[str, dict[str, int]] = {
     "cpu": {"v1": 1000, "v2": 1600},
     "gpu50k": {"v1": 50_000, "v2": 50_000},
@@ -74,16 +73,13 @@ SCALE_N_PAIRS: dict[str, dict[str, int]] = {
     "gpu10k_b8_bf16": {"v1": 10_000, "v2": 10_000},
 }
 
-# GPU-scale epochs are paper-sourced (Section V-H: 20 epochs); overrides the
-# per-variant epoch counts above. CPU scale keeps those defaults -- this was
-# previously an open question (see "Unspecified hyperparameters" below) and is now
-# resolved for gpu50k specifically.
+# GPU-scale training runs 20 epochs, which overrides the per-variant epoch counts above;
+# CPU scale keeps those.
 #
-# batch_size is 32, NOT the paper's stated 128: profiling (experiments/
-# profile_advenc_step.py) showed batch=128 pushing peak_reserved CUDA memory to
-# ~14.7GB against this machine's 8.2GB RTX 4060 Laptop card -- a hard overflow into
-# slow Windows shared-memory fallback, not a tunable inefficiency. This is a
-# documented hardware-driven deviation from Section V-H, not a methodology choice.
+# batch_size is 32 at gpu50k, set by the memory of the card, not by tuning: profiling
+# (experiments/profile_advenc_step.py) showed batch=128 pushing peak_reserved CUDA memory
+# to ~14.7GB against an 8.2GB RTX 4060 Laptop card -- an overflow into the slow Windows
+# shared-memory fallback.
 SCALE_TRAINING_OVERRIDES: dict[str, dict] = {
     "gpu50k": {"epochs": 20, "batch_size": 32},
     # Reduced scale: 10 epochs, batch 16 so the larger second encoder (mpnet) fits in 8 GB.
@@ -94,8 +90,7 @@ SCALE_TRAINING_OVERRIDES: dict[str, dict] = {
 
 
 class _Decoder(nn.Module):
-    """Dphi: 2-layer MLP, d -> hidden -> V, LayerNorm + GELU. No dropout (none
-    mentioned in the paper's description of this component)."""
+    """Dphi: 2-layer MLP, d -> hidden -> V, LayerNorm + GELU. No dropout."""
 
     def __init__(self, embedding_dim: int, hidden_dim: int = 512, vocab_size: int = VOCAB_SIZE):
         super().__init__()
@@ -156,7 +151,7 @@ class AdvEncTrainer:
         independently-dropout-masked embeddings, which is exactly the "different
         dropout" positive-pair trick; if the underlying model has no active dropout,
         both calls are deterministic and the pair degenerates to a literal duplicate
-        automatically, matching the paper's stated fallback with no special-casing.
+        automatically, with no special-casing.
         """
         features = self.encoder.preprocess(texts)
         # preprocess() (sentence-transformers >=5.x) includes non-tensor bookkeeping
@@ -216,19 +211,17 @@ class AdvEncTrainer:
                 ).to(self.device)
 
                 # ---- decoder step: L_dec = BCE(Dphi(sg[Etheta(x)]), t) ----
-                # A dedicated no_grad forward pass for sg[Etheta(x)], NOT a reused
-                # tensor from a grad-enabled forward computed once for both steps.
-                # An earlier version computed positive_emb once (with grad) and used
-                # positive_emb.detach() here to save a forward pass -- but that kept
-                # both the decoder step's and encoder step's backward graphs alive
-                # simultaneously, effectively doubling peak activation memory for the
-                # whole step. Profiling at batch=128 (experiments/profile_advenc_step.py)
-                # showed peak_reserved hitting ~14.7GB against an 8.2GB card -- Windows
-                # silently spilling into slow shared system memory, not a crash, but
-                # devastating and erratic per-step throughput. Recomputing here means
-                # this block's activations are freed (no_grad -> nothing retained)
-                # before the encoder step's forward passes even begin, at the cost of
-                # one extra forward pass per training step.
+                # A dedicated no_grad forward pass computes sg[Etheta(x)], rather than
+                # reusing a tensor from one grad-enabled forward shared by both steps.
+                # Sharing it (positive_emb.detach()) would save a forward pass but keep
+                # the decoder step's and the encoder step's backward graphs alive at the
+                # same time, roughly doubling peak activation memory for the step; at
+                # batch=128 peak_reserved reached ~14.7GB on an 8.2GB card, where Windows
+                # spills into slow shared system memory and per-step throughput becomes
+                # erratic (experiments/profile_advenc_step.py). Recomputing here frees
+                # this block's activations (no_grad -> nothing retained) before the
+                # encoder step's forward passes begin, at the cost of one extra forward
+                # pass per training step.
                 decoder_optimizer.zero_grad()
                 with torch.no_grad():
                     positive_emb_for_decoder = self._encode(positive_texts)
@@ -352,12 +345,13 @@ if __name__ == "__main__":
 
     from data.encode import ENCODERS
 
-    parser = argparse.ArgumentParser(description="Train an AdvEnc-defended sentence encoder (paper Section V-A).")
+    parser = argparse.ArgumentParser(description="Train an AdvEnc-defended sentence encoder.")
     parser.add_argument("--variant", choices=list(ADV_ENC_CONFIGS), required=True)
     parser.add_argument(
         "--scale", choices=list(SCALE_N_PAIRS), required=True,
-        help="Training-data scale: cpu (paper's small-scale config, Table IV) or "
-             "gpu50k (GPU-scale re-evaluation, 50,000 pairs, Table VII).",
+        help="Training-data scale: cpu (small-scale configuration, 1,000-1,600 pairs), "
+             "gpu50k (GPU-scale configuration, 50,000 pairs) or the reduced-scale gpu10k* "
+             "variants (10,000 pairs).",
     )
     parser.add_argument(
         "--encoder", choices=list(ENCODERS), required=True,
@@ -426,61 +420,27 @@ if __name__ == "__main__":
     print(f"wrote {log_path}")
 
 
-# Resolved (was flagged, now settled by user review):
-# - Decoder:encoder step ratio stays 1:1 -- matches the paper, don't diverge from what
-#   we're reproducing. decoder_loss is logged per-epoch regardless. NOTE: an earlier
-#   note here treated a fast-dropping decoder_loss as diagnostic of "FM2 (active
-#   facilitation)" -- that read did NOT survive the CPU-scale trivial-baseline check
-#   (results/advenc/cpu_scale_downstream_check.json): decoder_loss near the
-#   marginal-frequency trivial baseline means the decoder learned little beyond
-#   class-imbalance exploitation, not that it became a strong/facilitated inverter.
-#   Don't re-read decoder_loss alone as an FM signal without that baseline comparison.
-# - x = passage/document side: confirmed correct. The paper's threat model (Section
-#   II-A, eavesdropper attacker) is about someone who intercepted the vector store --
-#   passage embeddings, not query embeddings.
-# - Unspecified hyperparameters (lambda_ret, temperature, lr_encoder, lr_decoder): keep
-#   as configurable defaults; disclose the chosen values explicitly in the paper's
-#   methodology section as a reproducibility note. epochs is paper-sourced for gpu50k
-#   scale (20, Section V-H) -- see SCALE_TRAINING_OVERRIDES. batch_size for gpu50k is
-#   32, a documented deviation from the paper's stated 128 due to this machine's 8GB
-#   VRAM ceiling (see SCALE_TRAINING_OVERRIDES' comment and the memory-profiling note
-#   in train() above) -- disclose this as a hardware limitation, not silently. cpu
-#   scale still uses the epochs-per-variant/batch_size=16 defaults below.
-# - {scale} in filenames: means training-data scale (cpu ~1000-1600 pairs vs. gpu50k
-#   50,000 pairs, matching Table IV vs. Table VII), NOT the base encoder. Filenames are
-#   now advenc_{variant}_{scale}_{encoder}.pt / {variant}_{scale}_{encoder}_trainlog.json,
-#   with encoder tracked as its own component so this can generalize beyond MiniLM
-#   later even though the original FM1-FM3 ablations only used MiniLM.
-# - .train() throughout / is_selected handling: no change needed.
-# - Naming note for the paper (not a code change): the CPU-scale findings (collapse
-#   traced to a centroid/distributional shift rather than rank reduction -- see
-#   results/advenc/fm1_*.json) contradict the specific "rank collapse -> easier
-#   inversion" mechanism the original draft's "FM1" label was attached to. Don't reuse
-#   "FM1" for this in the revised taxonomy -- it's a different mechanism and needs its
-#   own name (e.g. "FM1' -- Distributional Drift") so the methodology and results
-#   sections don't silently mean different things by the same label.
-#
-# Still open:
-# 1. Decoder/encoder step ratio and ordering: implemented as strict 1:1 alternation,
-#    decoder step first then encoder step, every batch (see "Resolved" above -- kept
-#    intentionally). Still worth watching decoder_loss in the trainlog for signs the
-#    decoder never got competent enough to make L_priv meaningful -- but compare it
-#    against a trivial baseline before drawing conclusions (see resolved note above).
-# 2. (resolved, see above)
-# 3. Unspecified hyperparameters: lambda_ret (defaulted to 1.0), InfoNCE temperature
-#    (0.05), lr_encoder (2e-5, standard transformer fine-tuning rate), lr_decoder
-#    (1e-3, matching LinearProbeAttacker/MLPAttacker elsewhere in this repo) remain
-#    implementation defaults, not paper-sourced values, at both scales. batch_size and
-#    epochs are resolved for gpu50k (paper-sourced, see above); cpu scale's batch_size
-#    =16 is still just a reasonable-throughput default, not paper-sourced.
-# 4. (resolved, see above)
-# 5. Dropout/eval mode during training: self.encoder.train() is set once at the start
-#    of train() and never toggled to eval() (needed for v2's dropout-based positive
-#    pairs, and standard for fine-tuning generally). This means decoder-step target
-#    embeddings (positive_emb) are also computed with dropout noise, for both v1 and
-#    v2 -- the paper doesn't say whether the decoder's training target should be a
-#    deterministic (eval-mode) embedding instead. Likely immaterial but noting it.
-# 6. is_selected passages: MS MARCO v2.1 rows occasionally have zero selected
-#    passages (unanswerable queries) or more than one; build_query_passage_pairs
-#    skips rows with none and takes only the first when there's more than one. Not
-#    stated as a requirement, just the natural reading of "relevant passage" (singular).
+# Implementation notes
+# - Alternation: strict 1:1, decoder step first and then encoder step, every batch.
+#   decoder_loss is logged per epoch. Compare it with the trivial marginal-frequency
+#   baseline (experiments/advenc_cpu_scale_check.py,
+#   results/advenc/cpu_scale_downstream_check.json) before reading a fast-dropping
+#   decoder_loss as a sign of a strong inverter: a loss near that baseline means the
+#   decoder learned little beyond class-imbalance exploitation.
+# - x is the passage/document side. Passage embeddings are what an attacker who obtained
+#   the vector store would target, not query embeddings.
+# - lambda_ret (1.0), the InfoNCE temperature (0.05), lr_encoder (2e-5, a standard
+#   transformer fine-tuning rate) and lr_decoder (1e-3, as for LinearProbeAttacker and
+#   MLPAttacker) are fixed implementation defaults at every scale, not tuned. Epochs and
+#   batch size per scale are in SCALE_TRAINING_OVERRIDES; cpu scale uses the per-variant
+#   epochs and batch_size=16 (AdvEncTrainer's default).
+# - {scale} in file names is the training-data scale (cpu 1,000-1,600 pairs, gpu50k 50,000
+#   pairs, gpu10k* 10,000 pairs), not the base encoder. Names are
+#   advenc_{variant}_{scale}_{encoder}.pt and {variant}_{scale}_{encoder}_trainlog.json,
+#   with the encoder as its own component.
+# - Dropout: self.encoder.train() is set once at the start of train() and never switched
+#   to eval() (v2's positive pairs need dropout). The decoder-step target embeddings are
+#   therefore also computed with dropout, for both v1 and v2.
+# - is_selected: MS MARCO v2.1 rows can have no selected passage (skipped by
+#   build_query_passage_pairs) or several (only the first is used), the natural reading of
+#   "relevant passage" (singular).
